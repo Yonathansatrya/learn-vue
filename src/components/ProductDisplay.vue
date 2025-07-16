@@ -2,6 +2,7 @@
 import { ref, computed, reactive } from 'vue'
 import ReviewForm from './ReviewForm.vue'
 import ReviewList from './ReviewList.vue'
+import CreateStock from './CreateStock.vue'
 import socksGreenImage from '@/assets/images/socks_green.jpeg'
 import socksBlueImage from '@/assets/images/socks_blue.jpeg'
 
@@ -13,11 +14,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['add-to-cart'])
-const emitAddToStock = defineEmits(['add-stock-quantity'])
-
-const stock = reactive({
-  quantity: null
-})
 
 const product = ref('Socks')
 const brand = ref('Vue Mastery')
@@ -32,6 +28,7 @@ const variants = ref([
 ])
 
 const reviews = ref([])
+const stocks = ref([])
 
 const title = computed(() => {
   return brand.value + ' ' + product.value
@@ -42,11 +39,15 @@ const image = computed(() => {
 })
 
 const quantity = computed(() => {
-  return variants.value[selectedVariant.value].quantity + stock.quantity
+  if (props.stocks) {
+    return props.stocks + variants.value[selectedVariant.value].quantity
+  }
+
+  return variants.value[selectedVariant.value].quantity
 })
 
 const inStock = computed(() => {
-  return variants.value[selectedVariant.value].quantity > 0 && addToCart.value <= quantity
+  return variants.value[selectedVariant.value].quantity > 0 
 })
 
 const shipping = computed(() => {
@@ -58,15 +59,13 @@ const shipping = computed(() => {
   }
 })
 
-const onSubmit = () => {
-  const CurrentQuantity = {
-    quantity: stock.quantity
-  }
-  emitAddToStock('add-stock-quantity',CurrentQuantity)
-  stock.quantity = null
-}
-
 const addToCart = () => {
+  if (variants.value[selectedVariant.value].quantity > 0) {
+    variants.value[selectedVariant.value].quantity -= 1
+  } else {
+    alert('Out of stock')
+    return
+  }
   emit('add-to-cart', variants.value[selectedVariant.value].id)
 }
 
@@ -76,6 +75,10 @@ const updateVariant = (index) => {
 
 const addReview = (review) => {
   reviews.value.push(review)
+}
+
+const AddStock = (stock) => {
+  stocks.value.push(stock)
 }
 </script>
 
@@ -89,14 +92,7 @@ const addReview = (review) => {
         <h1>{{ title }}</h1>
         <p v-if="inStock">In Stock {{ quantity }}</p>
         <p v-else>Out of Stock</p>
-        <div class="add-stock">
-          <form class="stock-form" @submit.prevent="onSubmit">
-            <label for="quantity">Add Stock</label>
-            <input type="number" id="quantity" v-model="stock.quantity" min="0">
-            
-            <input class="button-submit" type="submit" value="Add Stock">
-          </form>
-        </div>
+        <CreateStock @add-stock-quantity="AddStock"></CreateStock>
         <p>Shipping: {{ shipping }}</p>
         <ul>
           <li v-for="detail in details">{{ detail }}</li>

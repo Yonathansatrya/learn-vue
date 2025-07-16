@@ -26,8 +26,6 @@ const onSubmit = () => {
   <form class="review-form" @submit.prevent="onSubmit">
    <label for="quantity">Add Stock</label>
     <input type="number" id="quantity" v-model="stock.quantity" min="0">
-    <input class="button-submit" type="submit" value="Add Stock">
-
-    <input class="button" type="submit" value="Submit">
+    <input class="button-submit" type="submit" value="Submit">
   </form>
 </template>
