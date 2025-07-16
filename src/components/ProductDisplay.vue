@@ -39,10 +39,6 @@ const image = computed(() => {
 })
 
 const quantity = computed(() => {
-  if (props.stocks) {
-    return props.stocks + variants.value[selectedVariant.value].quantity
-  }
-
   return variants.value[selectedVariant.value].quantity
 })
 
@@ -79,6 +75,7 @@ const addReview = (review) => {
 
 const AddStock = (stock) => {
   stocks.value.push(stock)
+  variants.value[selectedVariant.value].quantity += stock.quantity
 }
 </script>
 
@@ -92,7 +89,6 @@ const AddStock = (stock) => {
         <h1>{{ title }}</h1>
         <p v-if="inStock">In Stock {{ quantity }}</p>
         <p v-else>Out of Stock</p>
-        <CreateStock @add-stock-quantity="AddStock"></CreateStock>
         <p>Shipping: {{ shipping }}</p>
         <ul>
           <li v-for="detail in details">{{ detail }}</li>
@@ -114,6 +110,7 @@ const AddStock = (stock) => {
           Add to cart
         </button>
       </div>
+        <CreateStock @add-stock-quantity="AddStock"></CreateStock>
     </div>
     <ReviewList v-if="reviews.length > 0" :reviews="reviews"></ReviewList>
     <ReviewForm @review-submitted="addReview"></ReviewForm>
